@@ -1,5 +1,4 @@
 //プログラム 2023.10.16~
-// PSJA搭載双発横力板、エルロンのフラッペロン動作対応（プロポ操作）
 #include <SD.h>
 #include "AK09918.h"
 #include "ICM20600.h"
@@ -68,7 +67,7 @@ int16_t ch[18];
 const float control_sample_time = 0.04;
 
 const float kp_ail = 40.0;const float kd_ail = 0.0;const float ki_ail = 0.0;
-float kp_ele = 30.0; //離陸25
+float kp_ele = 10.0; //離陸25
 const float kp_ele_turn = 22.0; //旋回22
 const float kd_ele = 0.0;//2
 const float kd1_ele = 0.0;
@@ -159,7 +158,6 @@ float roll, pitch, yaw;
 float roll_magnetism, pitch_magnetism, yaw_magnetism;
 float v_sen_x, v_sen_y, v_sen_z, u, v, w, v_mag,v_def, v_mag_pre, attack_angle, sideslip_angle;
 
-int PSJA_RUN = 0; //PSJA作動状態 ROSについか
 
 //旋回PID
 float sff_ref = 0;
@@ -533,8 +531,6 @@ void SDPrint(void){
     dataFile.print(y2);
     dataFile.print(" , ");
     dataFile.print(z2);
-    dataFile.print(" , ");
-    dataFile.print(PSJA_RUN);
     /*dataFile.print(" , ");
     dataFile.print(latitude);
     dataFile.print(" , ");
@@ -709,7 +705,6 @@ void setup(void) {
       dataFile.print(" , ");
       dataFile.print("error sbus end , sbus frame loss , sbus failsafe");
       dataFile.print(" , null , null , null , ");
-      dataFile.print("PSJA_RUN");
       dataFile.println();
       dataFile.close();
     }
@@ -730,9 +725,6 @@ void setup(void) {
     ledcAttachPin(IN[i], CHANNEL[i]);
   }
 
-pinMode(32, OUTPUT); //PSJA_RUN_setup
-//digitalWrite(32, HIGH);
-
 }
 
 bool sd_flag = false;
@@ -752,14 +744,6 @@ void loop(void) {
     //Serial.println("ACK6200_OK!");
     Control();
     //Serial.println("Control_OK!");
-
-    if(ch[10] > 1600){ //PSJA駆動
-        digitalWrite(32,LOW);
-        PSJA_RUN = 1;
-    }if(ch[10]<=1600){
-        digitalWrite(32,HIGH);
-        PSJA_RUN = 0;
-    }
     
 //    SerialPrint();
     //if(ch[9]>1400){
