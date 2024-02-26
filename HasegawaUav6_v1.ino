@@ -1,4 +1,5 @@
 //プログラム 2023.10.16~
+//書き込んだよ
 #include <SD.h>
 #include "AK09918.h"
 #include "ICM20600.h"
